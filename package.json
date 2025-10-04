@@ -1,6 +1,7 @@
 {
   "name": "@harryplusplus/knex-pglite",
   "version": "0.1.1-dev.1",
+  "private": false,
   "description": "PGlite dialect for Knex.js.",
   "keywords": [
     "knex",
@@ -71,6 +72,5 @@
   "packageManager": "pnpm@10.15.1",
   "engines": {
     "node": ">= 20.19.5"
-  },
-  "private": false
+  }
 }
