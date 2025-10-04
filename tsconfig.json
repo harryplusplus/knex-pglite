@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "exactOptionalPropertyTypes": true,
+    "isolatedModules": true,
+    "module": "node20",
+    "moduleDetection": "force",
+    "moduleResolution": "node16",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "outDir": "dist",
+    "removeComments": false,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2020",
+    "verbatimModuleSyntax": false,
+    "typeRoots": ["./src/@types", "./node_modules/@types"]
+  },
+  "exclude": ["dist/**/*"],
+  "include": ["**/*.ts"]
+}
