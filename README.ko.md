@@ -1,6 +1,6 @@
 # Knex.js PGlite Dialect
 
-[PGlite](https://pglite.dev/) dialect for [Knex.js](https://knexjs.org/).
+[Knex.js](https://knexjs.org/)를 위한 [PGlite](https://pglite.dev/) 방언.
 
 ## Table of Contents
 
