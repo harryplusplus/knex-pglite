@@ -6,4 +6,11 @@
 
 <!-- toc -->
 
+- [Languages](#languages)
+
 <!-- tocstop -->
+
+## Languages
+
+- [English](/README.md)
+- [한국어](/README.ko.md)

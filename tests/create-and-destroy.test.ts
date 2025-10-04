@@ -1,5 +1,6 @@
+import { PGlite } from "@electric-sql/pglite";
 import { Knex } from "knex";
-import { Client_PGlite, knex, PGlite } from "../src";
+import { Client_PGlite, knex } from "../src";
 
 describe("create with owned", () => {
   let inst: Knex;
