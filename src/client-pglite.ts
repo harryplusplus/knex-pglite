@@ -1,0 +1,164 @@
+import type { PGlite, Results } from "@electric-sql/pglite";
+import * as PGliteModule from "@electric-sql/pglite";
+import type { Knex } from "knex";
+import Client_PG from "knex/lib/dialects/postgres";
+import { Readable, type Transform } from "stream";
+import type { PGliteConfig, PGliteConnectionConfig } from "./knex";
+
+interface QueryObject {
+  sql?: string;
+  bindings?: unknown[];
+  method?: string;
+  response: Results | Results[];
+}
+
+export class Client_PGlite extends Client_PG {
+  override dialect = "pglite";
+  override driverName = "@electric-sql/pglite";
+
+  private acquireInternalPromise: Promise<PGlite> | null = null;
+  private pglite: PGlite | null = null;
+  private ownership: "owned" | "borrowed" | null = null;
+
+  constructor(config: PGliteConfig) {
+    super(config as Knex.Config);
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override _driver(): typeof import("@electric-sql/pglite") {
+    return PGliteModule;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override async _acquireOnlyConnection(): Promise<PGlite> {
+    if (this.acquireInternalPromise) {
+      return this.acquireInternalPromise;
+    }
+
+    this.acquireInternalPromise = this.acquireInternal();
+    return this.acquireInternalPromise;
+  }
+
+  private async acquireInternal(): Promise<PGlite> {
+    if (this.pglite) {
+      await this.pglite.waitReady;
+      return this.pglite;
+    }
+
+    const { pglite } = this.connectionSettings as PGliteConnectionConfig;
+    if (!pglite) {
+      this.pglite = new PGliteModule.PGlite();
+      this.ownership = "owned";
+    } else {
+      this.pglite = pglite();
+      this.ownership = "borrowed";
+    }
+
+    await this.pglite.waitReady;
+    return this.pglite;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override async destroyRawConnection(connection: PGlite): Promise<void> {
+    if (this.ownership === "owned") {
+      await connection.close();
+    }
+
+    this.acquireInternalPromise = null;
+    this.pglite = null;
+    this.ownership = null;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  async checkVersion(connection: PGlite): Promise<string> {
+    const result = await connection.query("select version();");
+    const row = result.rows[0] as { version?: string };
+    return this._parseVersion(row.version) as string;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  async setSchemaSearchPath(connection: PGlite, searchPath: string | string[]) {
+    let path = searchPath || this.searchPath;
+
+    if (!path) return Promise.resolve(true);
+
+    if (!Array.isArray(path) && typeof path !== "string") {
+      throw new TypeError(
+        `knex: Expected searchPath to be Array/String, got: ${typeof path}`
+      );
+    }
+
+    if (typeof path === "string") {
+      if (path.includes(",")) {
+        const parts = path.split(",");
+        const arraySyntax = `[${parts
+          .map((searchPath) => `'${searchPath}'`)
+          .join(", ")}]`;
+        this.logger.warn?.(
+          `Detected comma in searchPath "${path}".` +
+            `If you are trying to specify multiple schemas, use Array syntax: ${arraySyntax}`
+        );
+      }
+      path = [path];
+    }
+
+    path = (path as string[]).map((schemaName) => `"${schemaName}"`).join(",");
+
+    const result = await connection.query(
+      `set search_path to ${path as string}`
+    );
+    return result;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override async _stream(
+    connection: PGlite,
+    obj: QueryObject,
+    stream: Transform,
+    _options: unknown
+  ) {
+    if (!obj.sql) throw new Error("The query is empty");
+
+    // PGlite does not support query streaming. This implementation only
+    // matches the interface for compatibility.
+    const results = await connection.query(obj.sql, obj.bindings ?? []);
+    const queryStream = Readable.from(results.rows);
+
+    return new Promise((resolve, reject) => {
+      queryStream.on("error", (e) => {
+        stream.emit("error", e);
+        reject(e);
+      });
+      stream.on("end", resolve);
+      queryStream.pipe(stream);
+    });
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override async _query(connection: PGlite, obj: QueryObject) {
+    if (!obj.sql) throw new Error("The query is empty");
+
+    const isMultiStatements =
+      obj.method === "raw" &&
+      obj.sql.split(";").filter((x) => x.trim().length !== 0).length > 1;
+    if (isMultiStatements) {
+      obj.response = await connection.exec(obj.sql);
+    } else {
+      obj.response = await connection.query(obj.sql, obj.bindings ?? []);
+    }
+
+    return obj;
+  }
+
+  /* Overrides from Knex.Client */
+  override poolDefaults(): ReturnType<Knex.Client["poolDefaults"]> {
+    return { min: 1, max: 1, propagateCreateError: true };
+  }
+
+  getPGlite(): PGlite | null {
+    return this.pglite;
+  }
+}
+
+Client_PGlite.prototype.dialect = "pglite";
+Client_PGlite.prototype.driverName = "@electric-sql/pglite";
