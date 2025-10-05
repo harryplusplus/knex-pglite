@@ -48,9 +48,6 @@ interface QueryObject {
 }
 
 export class Client_PGlite extends Client_PG {
-  override dialect = "pglite";
-  override driverName = "@electric-sql/pglite";
-
   private acquireInternalPromise: Promise<PGlite> | null = null;
   private pglite: PGlite | null = null;
   private ownership: "owned" | "borrowed" | null = null;
