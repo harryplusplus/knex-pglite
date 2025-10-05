@@ -4,6 +4,16 @@ import Client_PG from "knex/lib/dialects/postgres";
 import { Readable, type Transform } from "stream";
 import type { PGliteConnectionConfig } from "./knex";
 
+export interface QueryObject {
+  sql?: string;
+  bindings?: unknown[];
+  method?: string;
+  output?: (resp: unknown) => unknown;
+  returning?: unknown;
+  pluck?: string;
+  response: Results | Results[];
+}
+
 export type Row<
   T = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,17 +50,13 @@ export interface PGlite {
   exec(query: string, options?: any): Promise<Array<Results>>;
 }
 
-interface QueryObject {
-  sql?: string;
-  bindings?: unknown[];
-  method?: string;
-  output?: (resp: unknown) => unknown;
-  returning?: unknown;
-  pluck?: string;
-  response: Results | Results[];
-}
-
-export class Client_PGlite extends Client_PG {
+// NOTE: The `client` property of the `config` parameter of the `knex` function
+// in the `knex` package requires the type `typeof Knex.Client`.
+// My `Client_PGlite` implementation, for convenience, avoids the need for
+// users to do the boilerplate `as unknown as typeof Knex.Client`. I use
+// several type assertions and `@ts-expect-error` to comply with this
+// requirement.
+export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) {
   private acquireInternalPromise: Promise<PGlite> | null = null;
   private pglite: PGlite | null = null;
   private ownership: "owned" | "borrowed" | null = null;
@@ -60,12 +66,12 @@ export class Client_PGlite extends Client_PG {
   }
 
   /* Overrides from Knex.Client_PG */
-  override _driver(): typeof import("@electric-sql/pglite") {
+  _driver(): typeof import("@electric-sql/pglite") {
     return PGliteModule;
   }
 
   /* Overrides from Knex.Client_PG */
-  override async _acquireOnlyConnection(): Promise<PGlite> {
+  async _acquireOnlyConnection(): Promise<PGlite> {
     if (this.acquireInternalPromise) {
       return this.acquireInternalPromise;
     }
@@ -108,11 +114,17 @@ export class Client_PGlite extends Client_PG {
   async checkVersion(connection: PGlite): Promise<string> {
     const result = await connection.query("select version();");
     const row = result.rows[0] as { version?: string };
+    // @ts-expect-error The `Knex.Client_PG` instance owns a `_parseVersion`
+    // member method.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     return this._parseVersion(row.version) as string;
   }
 
   /* Overrides from Knex.Client_PG */
   async setSchemaSearchPath(connection: PGlite, searchPath: string | string[]) {
+    // @ts-expect-error The `Knex.Client_PG` instance owns a `searchPath`
+    // member variable.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     let path = searchPath || this.searchPath;
 
     if (!path) return Promise.resolve(true);
@@ -146,7 +158,7 @@ export class Client_PGlite extends Client_PG {
   }
 
   /* Overrides from Knex.Client_PG */
-  override async _stream(
+  async _stream(
     connection: PGlite,
     obj: QueryObject,
     stream: Transform,
@@ -170,7 +182,7 @@ export class Client_PGlite extends Client_PG {
   }
 
   /* Overrides from Knex.Client_PG */
-  override async _query(connection: PGlite, obj: QueryObject) {
+  async _query(connection: PGlite, obj: QueryObject) {
     if (!obj.sql) throw new Error("The query is empty");
 
     const isMultiStatements =
@@ -186,7 +198,7 @@ export class Client_PGlite extends Client_PG {
   }
 
   /* Overrides from Knex.Client_PG */
-  override processResponse(obj: QueryObject, runner: unknown) {
+  processResponse(obj: QueryObject, runner: unknown) {
     const resp = obj.response;
     if (obj.output) return obj.output.call(runner, resp);
     if (obj.method === "raw" || Array.isArray(resp)) return resp;
