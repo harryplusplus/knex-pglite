@@ -1,7 +1,6 @@
-import type { PGlite } from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import knexInternal from "knex/lib/knex-builder/Knex";
-import { Client_PGlite } from "./client-pglite";
+import { Client_PGlite, type PGlite } from "./client-pglite";
 
 export type MaybePromise<T> = T | Promise<T>;
 
