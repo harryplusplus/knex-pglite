@@ -27,9 +27,9 @@
 
 ```sh
 # npm 사용시
-npm i knex @harryplusplus/knex-pglite @electric-sql/pglite
+npm i knex @electric-sql/pglite @harryplusplus/knex-pglite
 # pnpm 사용시
-pnpm add knex @harryplusplus/knex-pglite @electric-sql/pglite
+pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 ```
 
 > [!WARNING]

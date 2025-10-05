@@ -19,6 +19,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
+    "types": [],
     "target": "es2020",
     "verbatimModuleSyntax": false,
     "baseUrl": "."

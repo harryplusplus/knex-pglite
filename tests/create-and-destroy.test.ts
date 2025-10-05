@@ -1,4 +1,5 @@
 import { PGlite } from "@electric-sql/pglite";
+import { describe, expect, test } from "@jest/globals";
 import knex, { Knex } from "knex";
 import {
   Client_PGlite,

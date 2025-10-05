@@ -50,7 +50,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.10",
     "@eslint/js": "9.36.0",
-    "@types/jest": "30.0.0",
+    "@jest/globals": "30.2.0",
     "@types/node": "24.6.2",
     "copyfiles": "2.4.1",
     "eslint": "9.36.0",

@@ -1,7 +1,6 @@
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres";
-import { Readable, type Transform } from "stream";
 import type { PGliteConnectionConfig } from "./knex";
 
 export interface QueryObject {
@@ -161,22 +160,33 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
   async _stream(
     connection: PGlite,
     obj: QueryObject,
-    stream: Transform,
+    stream: unknown,
     _options: unknown
   ) {
     if (!obj.sql) throw new Error("The query is empty");
 
+    const isBrowser =
+      typeof window !== "undefined" && typeof window.document !== "undefined";
+    if (isBrowser) {
+      throw new Error("_stream is not supported in browser environments.");
+    }
+
     // PGlite does not support query streaming. This implementation only
     // matches the interface for compatibility.
     const results = await connection.query(obj.sql, obj.bindings ?? []);
+    const { Readable } = await import("stream");
     const queryStream = Readable.from(results.rows);
-
     return new Promise((resolve, reject) => {
       queryStream.on("error", (e) => {
+        // @ts-expect-error stream is Transform instance
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         stream.emit("error", e);
         reject(e);
       });
+      // @ts-expect-error stream is Transform instance
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       stream.on("end", resolve);
+      // @ts-expect-error stream is Transform instance
       queryStream.pipe(stream);
     });
   }
