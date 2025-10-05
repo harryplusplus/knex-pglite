@@ -17,12 +17,3 @@ declare module "knex/lib/dialects/postgres" {
     poolDefaults(): ReturnType<Knex.Client["poolDefaults"]>;
   }
 }
-
-declare module "knex/lib/knex-builder/Knex" {
-  import type { Knex } from "knex";
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
-  export default function knex<TRecord extends {} = any, TResult = unknown[]>(
-    config: Knex.Config | string
-  ): Knex<TRecord, TResult>;
-}

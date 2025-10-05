@@ -1,5 +1,4 @@
-import type { Knex } from "knex";
-import knexInternal from "knex/lib/knex-builder/Knex";
+import knexInternal, { type Knex } from "knex";
 import { Client_PGlite, type PGlite } from "./client-pglite";
 
 export type MaybePromise<T> = T | Promise<T>;

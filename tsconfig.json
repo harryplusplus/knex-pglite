@@ -20,8 +20,9 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2020",
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "baseUrl": "."
   },
   "exclude": ["dist/**/*"],
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "src/types.d.ts"]
 }
