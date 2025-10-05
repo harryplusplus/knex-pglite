@@ -1,9 +1,44 @@
-import type { PGlite, Results } from "@electric-sql/pglite";
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres";
 import { Readable, type Transform } from "stream";
 import type { PGliteConfig, PGliteConnectionConfig } from "./knex";
+
+export type Row<
+  T = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  },
+> = T;
+
+export type Results<
+  T = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  },
+> = {
+  rows: Row<T>[];
+  affectedRows?: number;
+  fields: {
+    name: string;
+    dataTypeID: number;
+  }[];
+  blob?: Blob;
+};
+
+export interface PGlite {
+  readonly waitReady: Promise<void>;
+  close(): Promise<void>;
+  query<T>(
+    query: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    options?: any
+  ): Promise<Results<T>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  exec(query: string, options?: any): Promise<Array<Results>>;
+}
 
 interface QueryObject {
   sql?: string;
