@@ -52,6 +52,7 @@ describe("create with borrowed", () => {
 
   test("destroy", async () => {
     await expect(db.destroy()).resolves.not.toThrow();
+    expect(pglite.closed).toBe(false);
     await expect(pglite.close()).resolves.not.toThrow();
   });
 });
