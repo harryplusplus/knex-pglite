@@ -204,7 +204,7 @@ export class Client_PGlite extends Client_PG {
       }
       return returns;
     }
-    if (obj.method === "update" || obj.method === "delete") {
+    if (obj.method === "update" || obj.method === "del") {
       return resp.affectedRows;
     }
     return resp;
