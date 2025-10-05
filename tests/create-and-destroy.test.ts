@@ -1,12 +1,12 @@
 import { PGlite } from "@electric-sql/pglite";
 import { Knex } from "knex";
-import { Client_PGlite, knex } from "../src";
+import { Client_PGlite, knexPGlite } from "../src";
 
 describe("create with owned", () => {
   let inst: Knex;
 
   test("create", () => {
-    inst = knex({});
+    inst = knexPGlite();
 
     expect(inst.client).toBeInstanceOf(Client_PGlite);
 
@@ -26,7 +26,7 @@ describe("create with borrowed", () => {
   const pglite = new PGlite();
 
   test("create", () => {
-    inst = knex({
+    inst = knexPGlite({
       connection: {
         pglite: () => pglite,
       },

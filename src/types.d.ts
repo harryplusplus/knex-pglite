@@ -13,6 +13,7 @@ declare module "knex/lib/dialects/postgres" {
       options: unknown
     ): unknown;
     _query(connection: unknown, obj: unknown): unknown;
+    processResponse(obj: unknown, runner: unknown): unknown;
     poolDefaults(): ReturnType<Knex.Client["poolDefaults"]>;
   }
 }

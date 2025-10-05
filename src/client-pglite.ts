@@ -44,6 +44,9 @@ interface QueryObject {
   sql?: string;
   bindings?: unknown[];
   method?: string;
+  output?: (resp: unknown) => unknown;
+  returning?: unknown;
+  pluck?: string;
   response: Results | Results[];
 }
 
@@ -180,6 +183,31 @@ export class Client_PGlite extends Client_PG {
     }
 
     return obj;
+  }
+
+  /* Overrides from Knex.Client_PG */
+  override processResponse(obj: QueryObject, runner: unknown) {
+    const resp = obj.response;
+    if (obj.output) return obj.output.call(runner, resp);
+    if (obj.method === "raw" || Array.isArray(resp)) return resp;
+    const { returning } = obj;
+    if (obj.method === "select") return resp.rows;
+    if (obj.method === "first") return resp.rows[0];
+    if (obj.method === "pluck") {
+      return resp.rows.map((x) => x[obj.pluck!] as unknown);
+    }
+    if (returning) {
+      const returns = [];
+      for (let i = 0, l = resp.rows.length; i < l; i++) {
+        const row = resp.rows[i];
+        returns[i] = row;
+      }
+      return returns;
+    }
+    if (obj.method === "update" || obj.method === "delete") {
+      return resp.affectedRows;
+    }
+    return resp;
   }
 
   /* Overrides from Knex.Client */
