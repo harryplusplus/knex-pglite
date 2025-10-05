@@ -140,7 +140,7 @@ PGlite는 다른 DB 클라이언트들과 다른 특성을 갖고 있습니다. 
 
 PGlite의 단일 인스턴스라는 특성 때문에, PGlite 인스턴스를 직접 주입하지 않으면 DB 데이터를 보관하는 PGlite 인스턴스의 생명주기가 knex 인스턴스의 생명주기에 종속됩니다.
 
-동일한 DB 데이터 구성을 필요로하는 여러 단위 테스트가 있는 사용사례에 대한 예제는 다음과 같습니다.
+동일한 DB 데이터 구성을 필요로하는 여러 단위 테스트가 있는 사용사례에 대한 예제는 다음과 같습니다. PGlite 인스턴스를 초기 구성한 후 `pglite.clone()` 메서드를 사용해서 격리된 메모리 DB를 구현합니다.
 
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
@@ -150,14 +150,69 @@ import {
 } from "@harryplusplus/knex-pglite";
 import knex, { Knex } from "knex";
 
-const pglite = new PGlite();
-const db = knex({
-  client: Client_PGlite,
-  connection: {
-    pglite: () => pglite,
-  } satisfies PGliteConnectionConfig as Knex.StaticConnectionConfig,
-});
+async function doTestSuite() {
+  const pglite = new PGlite();
+  // setup db using pglite...
+  await Promise.all([doUnitTest1(pglite), doUnitTest2(pglite)]);
+}
+
+async function doUnitTest1(pglite: PGlite) {
+  const db = knex({
+    client: Client_PGlite,
+    connection: {
+      pglite: () => pglite.clone(), // clone data
+    } satisfies PGliteConnectionConfig as Knex.StaticConnectionConfig,
+  });
+  // test using cloned pglite...
+}
+
+async function doUnitTest2(pglite: PGlite) {
+  const db = knex({
+    client: Client_PGlite,
+    connection: {
+      pglite: () => pglite.clone(), // clone data
+    } satisfies PGliteConnectionConfig as Knex.StaticConnectionConfig,
+  });
+  // test using cloned pglite...
+}
 ```
+
+위 사용사례처럼 `connection` 속성 내 `pglite` 속성을 통해 PGlite 인스턴스를 주입할 수 있습니다. `pglite` 속성의 타입은 다음과 같습니다.
+
+```typescript
+export interface PGliteProvider {
+  (): MaybePromise<PGlite>; // (): PGlite | Promise<PGlite>
+}
+```
+
+그리고 `connection` 속성의 타입은 다음과 같습니다.
+
+```typescript
+export interface PGliteConnectionConfig {
+  pglite?: PGliteProvider;
+}
+```
+
+`satisfies PGliteConnectionConfig as Knex.StaticConnectionConfig`는 `connection` 속성 값에 대한 엄격한 타입 검사를 수행하고 knex 타입 호환을 위해 타입 단언을 적용합니다.
+
+또 다른 사용사례는 DB 덤프 데이터를 활용하는 것입니다. 예제는 다음과 같습니다.
+
+```typescript
+async function doTest(data: File) {
+  const db = knex({
+    client: Client_PGlite,
+    connection: {
+      pglite: () =>
+        new PGlite({
+          loadDataDir: data,
+        }),
+    } satisfies PGliteConnectionConfig as Knex.StaticConnectionConfig,
+  });
+  // do test using pglite...
+}
+```
+
+위 예제들처럼 PGlite의 다양한 기능을 활용하기 위해서는 PGlite 인스턴스 주입이 필요합니다.
 
 > [!NOTE]
 > PGlite의 다양한 기능을 확인하려면 [PGlite API](https://pglite.dev/docs/api) 문서를 읽어주세요.
