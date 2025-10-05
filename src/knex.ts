@@ -25,15 +25,11 @@ export interface PGliteConfig extends Omit<Knex.Config, "connection"> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
 export function knex<TRecord extends {} = any, TResult = unknown[]>(
-  config: PGliteConfig
+  config?: PGliteConfig
 ) {
-  if (!config.client) {
-    config.client = Client_PGlite as unknown as string;
-  }
-
-  if (!config.connection) {
-    config.connection = {};
-  }
+  config ??= {};
+  config.client ??= Client_PGlite as unknown as string;
+  config.connection ??= {};
 
   return knexInternal<TRecord, TResult>(config as Knex.Config);
 }
