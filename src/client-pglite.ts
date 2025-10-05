@@ -2,7 +2,7 @@ import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres";
 import { Readable, type Transform } from "stream";
-import type { PGliteConfig, PGliteConnectionConfig } from "./knex";
+import type { PGliteConnectionConfig } from "./knex";
 
 export type Row<
   T = {
@@ -55,8 +55,8 @@ export class Client_PGlite extends Client_PG {
   private pglite: PGlite | null = null;
   private ownership: "owned" | "borrowed" | null = null;
 
-  constructor(config: PGliteConfig) {
-    super(config as Knex.Config);
+  constructor(config: Knex.Config) {
+    super(config);
   }
 
   /* Overrides from Knex.Client_PG */
