@@ -25,5 +25,8 @@
     "baseUrl": "."
   },
   "exclude": ["dist/**/*"],
-  "include": ["**/*.ts", "src/types.d.ts"]
+  "include": ["**/*.ts", "src/types.d.ts"],
+  "ts-node": {
+    "files": true
+  }
 }
