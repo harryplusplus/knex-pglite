@@ -20,7 +20,7 @@ export interface Config<
 }
 
 export interface PGliteProvider {
-  (): PGlite;
+  (): MaybePromise<PGlite>;
 }
 
 export interface PGliteConnectionConfig {

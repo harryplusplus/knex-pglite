@@ -70,7 +70,7 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
   }
 
   /* Overrides from Knex.Client_PG */
-  async _acquireOnlyConnection(): Promise<PGlite> {
+  _acquireOnlyConnection(): Promise<PGlite> {
     if (this.acquireInternalPromise) {
       return this.acquireInternalPromise;
     }
@@ -90,7 +90,7 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
       this.pglite = new PGliteModule.PGlite();
       this.ownership = "owned";
     } else {
-      this.pglite = pglite();
+      this.pglite = await pglite();
       this.ownership = "borrowed";
     }
 

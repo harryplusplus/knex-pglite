@@ -57,6 +57,34 @@ describe("create with borrowed", () => {
   });
 });
 
+describe("create clone with borrowed", () => {
+  let db: Knex;
+  const pglite = new PGlite();
+
+  test("create clone", async () => {
+    db = knexPGlite({
+      connection: {
+        pglite: () => pglite.clone(),
+      },
+    });
+
+    expect(db.client).toBeInstanceOf(Client_PGlite);
+
+    const client = db.client as Client_PGlite;
+    expect(client.dialect).toBe("pglite");
+    expect(client.driverName).toBe("@electric-sql/pglite");
+    expect(client.getPGlite()).toBe(null);
+
+    await expect(db.raw("select 1")).resolves.not.toThrow();
+  });
+
+  test("destroy", async () => {
+    await expect(db.destroy()).resolves.not.toThrow();
+    expect(pglite.closed).toBe(false);
+    await expect(pglite.close()).resolves.not.toThrow();
+  });
+});
+
 describe("create with sync", () => {
   let db: Knex;
 
