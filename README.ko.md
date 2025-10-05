@@ -65,7 +65,7 @@ const db = knexPGlite();
 
 #### 커스텀 방언 타입 지원을 위한 타입화된 knex 함수를 사용한 방법
 
-`knex` 함수는 타입화된 `knex`의 래퍼 함수입니다.
+`@harryplusplus/knex-pglite` 패키지 내 `knex` 함수는 타입화된 `knex` 패키지 내 `knex`의 래퍼 함수입니다.
 첫 번째 타입 매개변수로 구체화된 ConnectionConfig 타입을 받습니다.
 
 ```typescript
@@ -105,5 +105,5 @@ const db = knex<PGliteConnectionConfig>({
 >
 > ![knex-untyped-invalid](/images/knex-untyped-invalid.png)
 >
-> 반면에 타입화된 `knex` 함수를 사용하면 타입 안전한 속성 검사를 수행할 수 있습니다.
+> 반면에 타입화된 knex 함수를 사용하면 타입 안전한 속성 검사를 수행할 수 있습니다.
 > ![typed-knex-invalid](/images/typed-knex-invalid.png)
