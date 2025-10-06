@@ -1,6 +1,7 @@
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres/index.js";
+import type { Transform } from "stream";
 import type { PGliteConnectionConfig } from "./config.js";
 
 export interface QueryObject {
@@ -125,10 +126,7 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
 
   /* Overrides from Knex.Client_PG */
   async setSchemaSearchPath(connection: PGlite, searchPath: string | string[]) {
-    // @ts-expect-error The `Knex.Client_PG` instance owns a `searchPath`
-    // member variable.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    let path = searchPath || this.searchPath;
+    let path = searchPath || ("searchPath" in this && this.searchPath);
 
     if (!path) return Promise.resolve(true);
 
@@ -160,6 +158,8 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
     return result;
   }
 
+  // NOTE: PGlite does not support query streaming. This implementation only
+  // matches the interface for compatibility.
   /* Overrides from Knex.Client_PG */
   async _stream(
     connection: PGlite,
@@ -167,25 +167,25 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
     stream: unknown,
     _options: unknown
   ) {
-    if (!obj.sql) throw new Error("The query is empty");
+    return new Promise<void>((resolve, _reject) => {
+      const writable = stream as Transform;
 
-    // PGlite does not support query streaming. This implementation only
-    // matches the interface for compatibility.
-    const results = await connection.query(obj.sql, obj.bindings ?? []);
-    const { Readable } = await import("stream");
-    const queryStream = Readable.from(results.rows);
-    return new Promise((resolve, reject) => {
-      queryStream.on("error", (e) => {
-        // @ts-expect-error stream is Transform instance
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        stream.emit("error", e);
-        reject(e);
-      });
-      // @ts-expect-error stream is Transform instance
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      stream.on("end", resolve);
-      // @ts-expect-error stream is Transform instance
-      queryStream.pipe(stream);
+      const reject = (e?: unknown) => {
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+        _reject(e);
+        writable.emit("error", e);
+      };
+
+      (async () => {
+        if (!obj.sql) throw new Error("The query is empty");
+
+        const { rows } = await connection.query(obj.sql, obj.bindings ?? []);
+        const { Readable } = await import("stream");
+        const readable = Readable.from(rows);
+        readable.on("error", reject);
+        writable.on("end", resolve);
+        readable.pipe(writable);
+      })().catch(reject);
     });
   }
 
