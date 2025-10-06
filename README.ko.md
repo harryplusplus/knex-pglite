@@ -143,7 +143,7 @@ async function doTest(data: File) {
     connection: {
       pglite: () =>
         new PGlite({
-          loadDataDir: data, // 덤프 데이터 불러오기
+          loadDataDir: data, // 덤프 데이터 로드하기
         }),
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
   });
