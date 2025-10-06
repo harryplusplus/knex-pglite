@@ -9,11 +9,11 @@
 - [언어](#%EC%96%B8%EC%96%B4)
 - [설치](#%EC%84%A4%EC%B9%98)
 - [사용법](#%EC%82%AC%EC%9A%A9%EB%B2%95)
-  - [기본 메모리 DB 사용법](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-db-%EC%82%AC%EC%9A%A9%EB%B2%95)
+  - [기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C)
   - [PGlite 인스턴스 주입 방법](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4-%EC%A3%BC%EC%9E%85-%EB%B0%A9%EB%B2%95)
     - [PGlite 인스턴스를 주입해야 하는 이유](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4%EB%A5%BC-%EC%A3%BC%EC%9E%85%ED%95%B4%EC%95%BC-%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0)
     - [여러 유닛 테스트 간 격리된 동일 데이터를 사용하는 방법](#%EC%97%AC%EB%9F%AC-%EC%9C%A0%EB%8B%9B-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%84-%EA%B2%A9%EB%A6%AC%EB%90%9C-%EB%8F%99%EC%9D%BC-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95)
-    - [`connection` 속성에서 타입 검사와 단언을 수행하는 이유](#connection-%EC%86%8D%EC%84%B1%EC%97%90%EC%84%9C-%ED%83%80%EC%9E%85-%EA%B2%80%EC%82%AC%EC%99%80-%EB%8B%A8%EC%96%B8%EC%9D%84-%EC%88%98%ED%96%89%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0)
+    - [`connection` 속성에 `satisfies`와 `as`을 사용하는 이유](#connection-%EC%86%8D%EC%84%B1%EC%97%90-satisfies%EC%99%80-as%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0)
     - [덤프 데이터를 불러오는 방법](#%EB%8D%A4%ED%94%84-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95)
 - [API](#api)
   - [`client`](#client)
@@ -44,9 +44,9 @@ pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 
 ## 사용법
 
-### 기본 메모리 DB 사용법
+### 기본 메모리 모드
 
-PGlite를 기본 메모리 DB로 사용하려면 아래 예제처럼 초기화하세요.
+PGlite를 기본 메모리 모드로 사용하려면 아래 예제처럼 초기화하세요.
 
 ```typescript
 import { Client_PGlite } from "@harryplusplus/knex-pglite";
@@ -71,9 +71,9 @@ const knex = Knex({
 
 #### PGlite 인스턴스를 주입해야 하는 이유
 
-PGlite는 단일 인스턴스 기반 DB입니다.
-일반적인 네트워크나 파일 시스템 기반 클라이언트/서버 구조 DB와 다릅니다.
-[기본 메모리 DB 사용법](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-db-%EC%82%AC%EC%9A%A9%EB%B2%95)에서처럼 Knex 인스턴스 내부에서 PGlite 인스턴스를 생성하면, 마치 클라이언트 내부에 서버를 생성하는 것과 같습니다.
+PGlite는 단일 인스턴스 기반 데이터베이스입니다.
+일반적인 네트워크나 파일 시스템 기반 클라이언트/서버 구조 데이터베이스와 다릅니다.
+[기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C)에서 설명한 것처럼 Knex 인스턴스 내부에서 PGlite 인스턴스를 생성하면, 마치 클라이언트 내부에 서버를 생성하는 것과 같습니다.
 실제로 Knex 인스턴스가 해제되면 PGlite 인스턴스도 함께 해제됩니다.
 메모리 데이터의 덤프 및 로드, 여러 유닛 테스트 간 동일한 데이터의 격리 사용 등과 같은 경우 PGlite 인스턴스를 Knex 인스턴스에 주입하는 것이 유용할 수 있습니다.
 
@@ -118,7 +118,7 @@ async function doUnitTest2(pglite: PGlite) {
 }
 ```
 
-#### `connection` 속성에서 타입 검사와 단언을 수행하는 이유
+#### `connection` 속성에 `satisfies`와 `as`을 사용하는 이유
 
 `connection` 속성에 `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig`를 사용하는 이유는 다음과 같습니다.
 
@@ -187,7 +187,7 @@ export interface PGliteConnectionConfig {
 
 `pglite` 속성 타입은 다음과 같습니다.
 동기 혹은 비동기 함수 형태로 등록할 수 있습니다.
-값이 지정되지 않으면 [기본 메모리 DB 사용법](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-db-%EC%82%AC%EC%9A%A9%EB%B2%95) 절에서 설명한 대로 기본 메모리 DB 모드로 동작합니다.
+값이 지정되지 않으면 [기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C) 절에서 설명한 대로 기본 메모리 모드로 동작합니다.
 
 ```typescript
 export interface PGliteProvider {
@@ -207,7 +207,8 @@ import Knex from "knex";
 
 const pglite = new PGlite();
 const knex = Knex({
-  // 기본 메모리 DB 모드로 구성할 경우
+  client: Client_PGlite,
+  // 기본 메모리 모드로 구성할 경우
   // connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 빈 객체로 초기화해야 합니다.
 
   // PGlite 인스턴스를 주입할 경우
