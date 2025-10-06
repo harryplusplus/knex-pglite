@@ -2,7 +2,7 @@
 
 [Knex.js](https://knexjs.org/)를 위한 [PGlite](https://pglite.dev/) 방언.
 
-## Table of Contents
+## 목차
 
 <!-- toc -->
 
