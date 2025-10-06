@@ -1,7 +1,7 @@
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres";
-import type { PGliteConnectionConfig } from "./knex";
+import type { PGliteConnectionConfig } from "./config";
 
 export interface QueryObject {
   sql?: string;

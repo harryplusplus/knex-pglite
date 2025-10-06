@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, expect, test } from "@jest/globals";
-import { Knex } from "knex";
-import { knexPGlite } from "../src";
+import knex, { Knex } from "knex";
+import { defineConfig } from "../src";
 
 let db: Knex;
 
 beforeEach(async () => {
-  db = knexPGlite();
+  db = knex(defineConfig());
   await db.schema.createTable("users", function (table) {
     table.increments("id");
     table.text("name");

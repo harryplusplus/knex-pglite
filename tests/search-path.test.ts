@@ -1,13 +1,15 @@
 import { afterEach, beforeEach, expect, test } from "@jest/globals";
-import { Knex } from "knex";
-import { knexPGlite } from "../src";
+import knex, { Knex } from "knex";
+import { defineConfig } from "../src";
 
 let db: Knex;
 
 beforeEach(() => {
-  db = knexPGlite({
-    searchPath: "private",
-  });
+  db = knex(
+    defineConfig({
+      searchPath: "private",
+    })
+  );
 });
 
 afterEach(async () => {
