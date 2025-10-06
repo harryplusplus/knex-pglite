@@ -40,7 +40,7 @@ pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 ```
 
 > [!WARNING]
-> [Yarn](https://yarnpkg.com/) and [Bun](https://bun.com/) environments have not been tested yet.
+> [Yarn](https://yarnpkg.com/) and [Bun](https://bun.com/) environments have not been tested yet for compatibility.
 
 ## Usage
 
@@ -54,7 +54,7 @@ import Knex from "knex";
 
 const knex = Knex({
   client: Client_PGlite, // You must configure this to use the Knex PGlite dialect.
-  connection: {}, // It must be initialized as an empty object for PGlite connections, not for SQL generation.
+  connection: {}, // It must be initialized as a minimally empty object for PGlite connections, not for SQL generation.
 });
 ```
 
@@ -69,7 +69,7 @@ If more control is needed for data dumps, reuse, or isolation, see [Injecting a 
 
 #### Why inject a PGlite instance
 
-PGlite is a single-instance–based embedded Postgres that runs locally in WASM or against a chosen filesystem, which differs from traditional client/server databases over network or disk services.
+PGlite is a single-instance embedded Postgres that runs locally in WebAssembly or on a chosen filesystem, differing from traditional client-server databases that run over network connections or disk-based services.
 [Default in-memory mode](#default-in-memory-mode) Creating PGlite inside a Knex instance is analogous to spinning up the server within the client; when the Knex instance is disposed, the PGlite instance is disposed as well.
 For use cases like dumping/loading state or reusing identical seed data across isolated runs, injecting a managed PGlite instance can be beneficial.
 
@@ -114,7 +114,7 @@ async function doUnitTest2(pglite: PGlite) {
 
 #### Why use `satisfies` and `as` in `connection` property
 
-The reasons for using `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig` for the `connection` property are:
+You should use `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig` on the connection property for the following reasons:
 
 1. Strictly check the `connection` object via `satisfies PGliteConnectionConfig` for safer compile-time guarantees.
 2. Cast to `Knex.Knex.StaticConnectionConfig` to match Knex’s configuration contract at the boundary with the custom dialect.
@@ -137,7 +137,7 @@ async function doTest(data: File) {
     connection: {
       pglite: () =>
         new PGlite({
-          loadDataDir: data, // Load dump into the database
+          loadDataDir: data, // Load the dump into the database
         }),
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
   });
@@ -175,7 +175,7 @@ export interface PGliteConnectionConfig {
 }
 ```
 
-The following property configures how the dialect acquires a PGlite instance.
+The following property defines how the dialect obtains a PGlite instance.
 
 #### `pglite`
 
@@ -201,7 +201,7 @@ const pglite = new PGlite();
 const knex = Knex({
   client: Client_PGlite,
   // Default in-memory mode:
-  // connection: {}, // It must be initialized as an empty object for PGlite connections, not for SQL generation.
+  // connection: {}, // It must be initialized as a minimally empty object for PGlite connections, not for SQL generation.
 
   // Injecting a PGlite instance
   connection: {

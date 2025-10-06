@@ -54,7 +54,7 @@ import Knex from "knex";
 
 const knex = Knex({
   client: Client_PGlite, // Knex PGlite 방언을 사용하려면 반드시 설정해야 합니다.
-  connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 빈 객체로 초기화해야 합니다.
+  connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
 });
 ```
 
@@ -209,7 +209,7 @@ const pglite = new PGlite();
 const knex = Knex({
   client: Client_PGlite,
   // 기본 메모리 모드로 구성할 경우
-  // connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 빈 객체로 초기화해야 합니다.
+  // connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
 
   // PGlite 인스턴스를 주입할 경우
   connection: {
