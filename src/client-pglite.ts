@@ -1,6 +1,6 @@
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
-import Client_PG from "knex/lib/dialects/postgres";
+import Client_PG from "knex/lib/dialects/postgres/index.js";
 import type { PGliteConnectionConfig } from "./config";
 
 export interface QueryObject {
