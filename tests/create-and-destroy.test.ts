@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
-import { describe, expect, test } from "@jest/globals";
 import Knex from "knex";
-import { Client_PGlite, PGliteConnectionConfig } from "../src";
+import { describe, expect, test } from "vitest";
+import { Client_PGlite, PGliteConnectionConfig } from "../src/index.js";
 
 describe("create with owned", () => {
   let knex: Knex.Knex;

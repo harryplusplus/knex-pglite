@@ -17,16 +17,16 @@
   },
   "license": "MIT",
   "author": {
-    "email": "harryplusplus@gmail.com",
     "name": "harryplusplus",
+    "email": "harryplusplus@gmail.com",
     "url": "https://harryplusplus.com"
   },
-  "type": "commonjs",
+  "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -41,32 +41,31 @@
     "clean": "rimraf dist",
     "copy:types": "copyfiles -u 1 \"src/**/*.d.ts\" dist",
     "format": "run-p format:*",
-    "format:config": "jsonsort -a package.json cspell.json",
+    "format:package-json": "sort-package-json package.json",
     "format:readme": "prettier -w README*.md",
     "generate:readme-toc": "for file in $(glob 'README*.md'); do markdown-toc -i \"$file\"; done",
     "lint": "eslint",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "vitest --run"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.10",
     "@eslint/js": "9.36.0",
-    "@jest/globals": "30.2.0",
     "@types/node": "24.6.2",
     "copyfiles": "2.4.1",
     "eslint": "9.36.0",
     "glob": "11.0.3",
-    "jest": "30.2.0",
     "json-sort-cli": "4.0.10",
     "knex": "^3.1.0",
     "markdown-toc": "1.2.0",
     "npm-run-all": "4.1.5",
     "prettier": "3.6.2",
     "rimraf": "6.0.1",
-    "ts-jest": "29.4.4",
+    "sort-package-json": "3.4.0",
     "ts-node": "10.9.2",
     "tsup": "8.5.0",
     "typescript": "5.9.2",
-    "typescript-eslint": "8.45.0"
+    "typescript-eslint": "8.45.0",
+    "vitest": "3.2.4"
   },
   "peerDependencies": {
     "@electric-sql/pglite": "^0.3.10",

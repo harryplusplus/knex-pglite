@@ -1,7 +1,7 @@
 import * as PGliteModule from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import Client_PG from "knex/lib/dialects/postgres/index.js";
-import type { PGliteConnectionConfig } from "./config";
+import type { PGliteConnectionConfig } from "./config.js";
 
 export interface QueryObject {
   sql?: string;
@@ -92,6 +92,10 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
     } else {
       this.pglite = await pglite();
       this.ownership = "borrowed";
+    }
+
+    if (!this.pglite) {
+      throw new Error("this.pglite must exist.");
     }
 
     await this.pglite.waitReady;

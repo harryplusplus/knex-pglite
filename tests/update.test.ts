@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, expect, test } from "@jest/globals";
 import Knex from "knex";
-import { Client_PGlite } from "../src";
+import { afterEach, beforeEach, expect, test } from "vitest";
+import { Client_PGlite } from "../src/index.js";
 
 let knex: Knex.Knex;
 

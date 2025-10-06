@@ -1,2 +1,2 @@
-export * from "./client-pglite";
-export * from "./config";
+export * from "./client-pglite.js";
+export * from "./config.js";

@@ -1,4 +1,4 @@
-import { type PGlite } from "./client-pglite";
+import { type PGlite } from "./client-pglite.js";
 
 export type MaybePromise<T> = T | Promise<T>;
 
