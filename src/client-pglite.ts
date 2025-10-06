@@ -169,12 +169,6 @@ export class Client_PGlite extends (Client_PG as unknown as typeof Knex.Client) 
   ) {
     if (!obj.sql) throw new Error("The query is empty");
 
-    const isBrowser =
-      typeof window !== "undefined" && typeof window.document !== "undefined";
-    if (isBrowser) {
-      throw new Error("_stream is not supported in browser environments.");
-    }
-
     // PGlite does not support query streaming. This implementation only
     // matches the interface for compatibility.
     const results = await connection.query(obj.sql, obj.bindings ?? []);
