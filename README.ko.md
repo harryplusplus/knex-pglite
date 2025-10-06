@@ -53,12 +53,12 @@ import { Client_PGlite } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: Client_PGlite, // Knex.js PGlite 방언을 사용하려면 반드시 설정해야 합니다.
+  client: Client_PGlite, // Knex PGlite 방언을 사용하려면 반드시 설정해야 합니다.
   connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 빈 객체로 초기화해야 합니다.
 });
 ```
 
-위 예제처럼 초기화된 PGlite 인스턴스는 Knex.js 인스턴스 내에서 생성되므로 Knex.js 인스턴스의 생명주기를 공유합니다.
+위 예제처럼 초기화된 PGlite 인스턴스는 Knex 인스턴스 내에서 생성되므로 Knex 인스턴스의 생명주기를 공유합니다.
 대부분의 사용 사례에서는 이 방법으로 충분할 수 있습니다.
 
 > [!NOTE]
@@ -73,9 +73,9 @@ const knex = Knex({
 
 PGlite는 단일 인스턴스 기반 DB입니다.
 일반적인 네트워크나 파일 시스템 기반 클라이언트/서버 구조 DB와 다릅니다.
-[기본 메모리 DB 사용법](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-db-%EC%82%AC%EC%9A%A9%EB%B2%95)에서처럼 Knex.js 인스턴스 내부에서 PGlite 인스턴스를 생성하면, 마치 클라이언트 내부에 서버를 생성하는 것과 같습니다.
-실제로 Knex.js 인스턴스가 해제되면 PGlite 인스턴스도 함께 해제됩니다.
-메모리 데이터의 덤프 및 로드, 여러 유닛 테스트 간 동일한 데이터의 격리 사용 등과 같은 경우 PGlite 인스턴스를 Knex.js 인스턴스에 주입하는 것이 유용할 수 있습니다.
+[기본 메모리 DB 사용법](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-db-%EC%82%AC%EC%9A%A9%EB%B2%95)에서처럼 Knex 인스턴스 내부에서 PGlite 인스턴스를 생성하면, 마치 클라이언트 내부에 서버를 생성하는 것과 같습니다.
+실제로 Knex 인스턴스가 해제되면 PGlite 인스턴스도 함께 해제됩니다.
+메모리 데이터의 덤프 및 로드, 여러 유닛 테스트 간 동일한 데이터의 격리 사용 등과 같은 경우 PGlite 인스턴스를 Knex 인스턴스에 주입하는 것이 유용할 수 있습니다.
 
 #### 여러 유닛 테스트 간 격리된 동일 데이터를 사용하는 방법
 
@@ -123,7 +123,7 @@ async function doUnitTest2(pglite: PGlite) {
 `connection` 속성에 `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig`를 사용하는 이유는 다음과 같습니다.
 
 1. `connection` 객체의 타입을 엄격히 검사하기 위해 `satisfies PGliteConnectionConfig`를 사용합니다.
-2. Knex.js의 `connection` 타입 정의와 일치시키기 위해 `as Knex.Knex.StaticConnectionConfig`를 사용합니다.
+2. Knex의 `connection` 타입 정의와 일치시키기 위해 `as Knex.Knex.StaticConnectionConfig`를 사용합니다.
 
 #### 덤프 데이터를 불러오는 방법
 
@@ -153,11 +153,11 @@ async function doTest(data: File) {
 
 ## API
 
-Knex.js를 초기화할 때 `config` 매개변수에서 다음 속성을 설정합니다.
+Knex를 초기화할 때 `config` 매개변수에서 다음 속성을 설정합니다.
 
 ### `client`
 
-`client` 속성에 `Client_PGlite` 클래스를 지정해야 Knex.js PGlite 방언을 사용할 수 있습니다.
+`client` 속성에 `Client_PGlite` 클래스를 지정해야 Knex PGlite 방언을 사용할 수 있습니다.
 
 예제는 다음과 같습니다.
 
