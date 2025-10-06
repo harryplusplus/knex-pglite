@@ -21,8 +21,7 @@
     "strict": true,
     "types": [],
     "target": "es2020",
-    "verbatimModuleSyntax": false,
-    "baseUrl": "."
+    "verbatimModuleSyntax": false
   },
   "exclude": ["dist/**/*"],
   "include": ["**/*.ts", "src/types.d.ts"],

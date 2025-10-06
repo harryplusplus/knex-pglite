@@ -1,29 +1,29 @@
 import { afterEach, beforeEach, expect, test } from "@jest/globals";
-import knex, { Knex } from "knex";
-import { defineConfig } from "../src";
+import Knex from "knex";
+import { Client_PGlite } from "../src";
 
-let db: Knex;
+let knex: Knex.Knex;
 
 beforeEach(() => {
-  db = knex(
-    defineConfig({
-      searchPath: "private",
-    })
-  );
+  knex = Knex({
+    client: Client_PGlite,
+    connection: {},
+    searchPath: "private",
+  });
 });
 
 afterEach(async () => {
-  await db?.destroy();
+  await knex?.destroy();
 });
 
 test("search_path", async () => {
-  expect(await db.raw("create schema private;")).toEqual({
+  expect(await knex.raw("create schema private;")).toEqual({
     affectedRows: 0,
     fields: [],
     rows: [],
   });
   expect(
-    await db.schema.createTable("users", function (table) {
+    await knex.schema.createTable("users", function (table) {
       table.increments("id");
       table.text("name");
     })
@@ -33,7 +33,7 @@ test("search_path", async () => {
     rows: [],
   });
   expect(
-    await db.raw(`
+    await knex.raw(`
 select table_schema, table_name 
 from information_schema.tables 
 where table_name = 'users';

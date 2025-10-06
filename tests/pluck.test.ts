@@ -1,39 +1,42 @@
 import { afterEach, beforeEach, expect, test } from "@jest/globals";
-import knex, { Knex } from "knex";
-import { defineConfig } from "../src";
+import Knex from "knex";
+import { Client_PGlite } from "../src";
 
-let db: Knex;
+let knex: Knex.Knex;
 
 beforeEach(async () => {
-  db = knex(defineConfig());
-  await db.schema.createTable("users", function (table) {
+  knex = Knex({
+    client: Client_PGlite,
+    connection: {},
+  });
+  await knex.schema.createTable("users", function (table) {
     table.increments("id");
     table.text("name");
   });
 });
 
 afterEach(async () => {
-  await db?.destroy();
+  await knex?.destroy();
 });
 
 test("pluck empty", async () => {
-  expect(await db("users").pluck("id")).toEqual([]);
+  expect(await knex("users").pluck("id")).toEqual([]);
 });
 
 test("pluck id 1 matched", async () => {
-  await db("users").insert({ name: "a" });
-  expect(await db("users").pluck("id")).toEqual([1]);
-  expect(await db("users as u").pluck("u.id")).toEqual([1]);
+  await knex("users").insert({ name: "a" });
+  expect(await knex("users").pluck("id")).toEqual([1]);
+  expect(await knex("users as u").pluck("u.id")).toEqual([1]);
 });
 
 test("pluck id 2 matched", async () => {
-  await db("users").insert({ name: "a" });
-  await db("users").insert({ name: "b" });
-  expect(await db("users").pluck("id")).toEqual([1, 2]);
+  await knex("users").insert({ name: "a" });
+  await knex("users").insert({ name: "b" });
+  expect(await knex("users").pluck("id")).toEqual([1, 2]);
 });
 
 test("pluck name", async () => {
-  await db("users").insert({ name: "a" });
-  expect(await db("users").pluck("name")).toEqual(["a"]);
-  expect(await db("users as u").pluck("u.name")).toEqual(["a"]);
+  await knex("users").insert({ name: "a" });
+  expect(await knex("users").pluck("name")).toEqual(["a"]);
+  expect(await knex("users as u").pluck("u.name")).toEqual(["a"]);
 });
