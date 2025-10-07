@@ -10,49 +10,43 @@ import {
 import Client_PG from "knex/lib/dialects/postgres/index.js";
 
 export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) {
-  private readonly core: PGliteDialectCore;
+  private readonly core = new PGliteDialectCore({
+    getConnectionSettings: () => this.connectionSettings,
+    getSearchPath: () => {
+      if (
+        !("searchPath" in this) ||
+        typeof this.searchPath !== "string" ||
+        Array.isArray(this.searchPath)
+      ) {
+        return null;
+      }
 
-  constructor(config: Knex.Config) {
-    super(config);
+      return this.searchPath;
+    },
+    parseVersion: (version) => {
+      if (
+        !("_parseVersion" in this) ||
+        typeof this._parseVersion !== "function"
+      ) {
+        throw new Error("this._parseVersion must exist.");
+      }
 
-    this.core = new PGliteDialectCore({
-      getConnectionSettings: () => this.connectionSettings,
-      getSearchPath: () => {
-        if (
-          !("searchPath" in this) ||
-          typeof this.searchPath !== "string" ||
-          Array.isArray(this.searchPath)
-        ) {
-          return null;
-        }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+      const parsedVersion = this._parseVersion(version);
+      if (typeof parsedVersion !== "string") {
+        throw new Error("The version must be string type.");
+      }
 
-        return this.searchPath;
-      },
-      parseVersion: (version) => {
-        if (
-          !("_parseVersion" in this) ||
-          typeof this._parseVersion !== "function"
-        ) {
-          throw new Error("this._parseVersion must exist.");
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-        const parsedVersion = this._parseVersion(version);
-        if (typeof parsedVersion !== "string") {
-          throw new Error("The version must be string type.");
-        }
-
-        return parsedVersion;
-      },
-      log: (level, message) => {
-        if (level === "warn") {
-          this.logger.warn?.(message);
-        } else {
-          this.logger.debug?.(message);
-        }
-      },
-    });
-  }
+      return parsedVersion;
+    },
+    log: (level, message) => {
+      if (level === "warn") {
+        this.logger.warn?.(message);
+      } else {
+        this.logger.debug?.(message);
+      }
+    },
+  });
 
   _driver(): null {
     return PGliteDialectCore._driver();
