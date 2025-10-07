@@ -49,11 +49,11 @@ pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 PGlite를 기본 메모리 모드로 사용하려면 아래 예제처럼 초기화하세요.
 
 ```typescript
-import { Client_PGlite } from "@harryplusplus/knex-pglite";
+import { PGliteDialect } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: Client_PGlite, // Knex PGlite 방언을 사용하려면 반드시 설정해야 합니다.
+  client: PGliteDialect, // Knex PGlite 방언을 사용하려면 반드시 설정해야 합니다.
   connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
 });
 ```
@@ -86,7 +86,7 @@ PGlite 인스턴스를 테스트 환경 데이터로 초기화한 뒤, `pglite.c
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
@@ -99,7 +99,7 @@ async function doTestSuite() {
 
 async function doUnitTest1(pglite: PGlite) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () => pglite.clone(), // 데이터 복사
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
@@ -109,7 +109,7 @@ async function doUnitTest1(pglite: PGlite) {
 
 async function doUnitTest2(pglite: PGlite) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () => pglite.clone(), // 데이터 복사
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
@@ -132,14 +132,14 @@ async function doUnitTest2(pglite: PGlite) {
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 async function doTest(data: File) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () =>
         new PGlite({
@@ -157,16 +157,16 @@ Knex를 초기화할 때 `config` 매개변수에서 다음 속성을 설정합�
 
 ### `client`
 
-`client` 속성에 `Client_PGlite` 클래스를 지정해야 Knex PGlite 방언을 사용할 수 있습니다.
+`client` 속성에 `PGliteDialect` 클래스를 지정해야 Knex PGlite 방언을 사용할 수 있습니다.
 
 예제는 다음과 같습니다.
 
 ```typescript
-import { Client_PGlite } from "@harryplusplus/knex-pglite";
+import { PGliteDialect } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: Client_PGlite,
+  client: PGliteDialect,
   // ...
 });
 ```
@@ -200,14 +200,14 @@ export interface PGliteProvider {
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const pglite = new PGlite();
 const knex = Knex({
-  client: Client_PGlite,
+  client: PGliteDialect,
   // 기본 메모리 모드로 구성할 경우
   // connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
 

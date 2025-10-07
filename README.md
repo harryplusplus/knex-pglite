@@ -49,11 +49,11 @@ pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 To use PGlite in default in-memory mode, initialize Knex as follows.
 
 ```typescript
-import { Client_PGlite } from "@harryplusplus/knex-pglite";
+import { PGliteDialect } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: Client_PGlite, // You must configure this to use the Knex PGlite dialect.
+  client: PGliteDialect, // You must configure this to use the Knex PGlite dialect.
   connection: {}, // It must be initialized as a minimally empty object for PGlite connections, not for SQL generation.
 });
 ```
@@ -80,7 +80,7 @@ The example below initializes a base PGlite with prepared test data and uses `pg
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
@@ -93,7 +93,7 @@ async function doTestSuite() {
 
 async function doUnitTest1(pglite: PGlite) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () => pglite.clone(), // Copy data to an isolated environment
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
@@ -103,7 +103,7 @@ async function doUnitTest1(pglite: PGlite) {
 
 async function doUnitTest2(pglite: PGlite) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () => pglite.clone(), // Copy data to an isolated environment
     } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
@@ -126,14 +126,14 @@ PGlite can restore a database from a dump created by `dumpDataDir`; pass that du
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 async function doTest(data: File) {
   const knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {
       pglite: () =>
         new PGlite({
@@ -151,16 +151,16 @@ When initializing Knex, configure the following properties on the `config` objec
 
 ### `client`
 
-Set `client` to `Client_PGlite` to enable this dialect in Knex.
+Set `client` to `PGliteDialect` to enable this dialect in Knex.
 
 Example:
 
 ```typescript
-import { Client_PGlite } from "@harryplusplus/knex-pglite";
+import { PGliteDialect } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: Client_PGlite,
+  client: PGliteDialect,
   // ...
 });
 ```
@@ -192,14 +192,14 @@ Example:
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
 import {
-  Client_PGlite,
+  PGliteDialect,
   PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const pglite = new PGlite();
 const knex = Knex({
-  client: Client_PGlite,
+  client: PGliteDialect,
   // Default in-memory mode:
   // connection: {}, // It must be initialized as a minimally empty object for PGlite connections, not for SQL generation.
 
