@@ -25,5 +25,5 @@
     "verbatimModuleSyntax": false
   },
   "exclude": ["dist/**/*"],
-  "include": ["**/*.ts", "src/types.d.ts"]
+  "include": ["**/*.ts"]
 }
