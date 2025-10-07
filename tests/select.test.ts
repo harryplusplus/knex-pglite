@@ -1,12 +1,12 @@
 import Knex from "knex";
 import { afterEach, beforeEach, expect, test } from "vitest";
-import { Client_PGlite } from "../src/index.js";
+import { PGliteDialect } from "../src/index.js";
 
 let knex: Knex.Knex;
 
 beforeEach(async () => {
   knex = Knex({
-    client: Client_PGlite,
+    client: PGliteDialect,
     connection: {},
   });
   await knex.schema.createTable("users", function (table) {

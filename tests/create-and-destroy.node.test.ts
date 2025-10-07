@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import Knex from "knex";
 import { describe, expect, test } from "vitest";
-import { Client_PGlite, PGliteConnectionConfig } from "../src/index.js";
+import { PGliteConnectionConfig, PGliteDialect } from "../src/index.js";
 
 describe("create clone with borrowed", () => {
   let knex: Knex.Knex;
@@ -9,15 +9,15 @@ describe("create clone with borrowed", () => {
 
   test("create clone", async () => {
     knex = Knex({
-      client: Client_PGlite,
+      client: PGliteDialect,
       connection: {
         pglite: () => pglite.clone(),
       } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
     });
 
-    expect(knex.client).toBeInstanceOf(Client_PGlite);
+    expect(knex.client).toBeInstanceOf(PGliteDialect);
 
-    const client = knex.client as Client_PGlite;
+    const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
     expect(client.getPGlite()).toBe(null);

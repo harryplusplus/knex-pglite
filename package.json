@@ -35,11 +35,10 @@
   ],
   "scripts": {
     "all": "run-s generate:readme-toc format lint test build",
-    "build": "run-s clean build:js build:types copy:types",
+    "build": "run-s clean build:js build:types",
     "build:js": "tsup",
     "build:types": "tsc -p tsconfig.build.json",
     "clean": "rimraf dist",
-    "copy:types": "copyfiles -u 1 \"src/**/*.d.ts\" dist",
     "format": "run-p format:*",
     "format:package-json": "sort-package-json package.json",
     "format:readme": "prettier -w README*.md",

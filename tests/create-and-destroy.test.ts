@@ -1,20 +1,20 @@
 import { PGlite } from "@electric-sql/pglite";
 import Knex from "knex";
 import { describe, expect, test } from "vitest";
-import { Client_PGlite, PGliteConnectionConfig } from "../src/index.js";
+import { PGliteConnectionConfig, PGliteDialect } from "../src/index.js";
 
 describe("create with owned", () => {
   let knex: Knex.Knex;
 
   test("create", async () => {
     knex = Knex({
-      client: Client_PGlite,
+      client: PGliteDialect,
       connection: {},
     });
 
-    expect(knex.client).toBeInstanceOf(Client_PGlite);
+    expect(knex.client).toBeInstanceOf(PGliteDialect);
 
-    const client = knex.client as Client_PGlite;
+    const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
     expect(client.getPGlite()).toBe(null);
@@ -33,15 +33,15 @@ describe("create with borrowed", () => {
 
   test("create", async () => {
     knex = Knex({
-      client: Client_PGlite,
+      client: PGliteDialect,
       connection: {
         pglite: () => pglite,
       } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
     });
 
-    expect(knex.client).toBeInstanceOf(Client_PGlite);
+    expect(knex.client).toBeInstanceOf(PGliteDialect);
 
-    const client = knex.client as Client_PGlite;
+    const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
     expect(client.getPGlite()).toBe(null);
@@ -61,16 +61,16 @@ describe("create with sync", () => {
 
   test("create", async () => {
     knex = Knex({
-      client: Client_PGlite,
+      client: PGliteDialect,
       connection: () => {
         const connection: PGliteConnectionConfig = {};
         return connection as Knex.Knex.StaticConnectionConfig;
       },
     });
 
-    expect(knex.client).toBeInstanceOf(Client_PGlite);
+    expect(knex.client).toBeInstanceOf(PGliteDialect);
 
-    const client = knex.client as Client_PGlite;
+    const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
     expect(client.getPGlite()).toBe(null);
@@ -88,7 +88,7 @@ describe("create with async", () => {
 
   test("create", async () => {
     knex = Knex({
-      client: Client_PGlite,
+      client: PGliteDialect,
       connection: async () => {
         const connection: PGliteConnectionConfig = {};
         await Promise.resolve();
@@ -96,9 +96,9 @@ describe("create with async", () => {
       },
     });
 
-    expect(knex.client).toBeInstanceOf(Client_PGlite);
+    expect(knex.client).toBeInstanceOf(PGliteDialect);
 
-    const client = knex.client as Client_PGlite;
+    const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
     expect(client.getPGlite()).toBe(null);
