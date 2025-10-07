@@ -1,74 +1,84 @@
 import { PGliteInterface } from "@electric-sql/pglite";
 import type { Knex } from "knex";
 import {
-  PGliteDialectCore,
+  _query,
+  _stream,
+  patchPGliteDialect,
+  PGliteDialectContext,
+  poolDefaults,
   PoolDefaults,
+  processResponse,
   QueryObject,
-} from "./pglite-dialect-core.js";
+} from "./pglite-dialect-context.js";
 
 // @ts-expect-error Based on knex@3.1.0
 import Client_PG from "knex/lib/dialects/postgres/index.js";
 
 export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) {
-  private readonly core = new PGliteDialectCore({
-    getConnectionSettings: () => this.connectionSettings,
-    getSearchPath: () => {
-      if (
-        !("searchPath" in this) ||
-        typeof this.searchPath !== "string" ||
-        Array.isArray(this.searchPath)
-      ) {
-        return null;
-      }
+  /**
+   * The driver has its own state for each pglite dialect.
+   */
+  _driver(): PGliteDialectContext {
+    return new PGliteDialectContext({
+      getConnectionSettings: () => this.connectionSettings,
+      getSearchPath: () => {
+        if (
+          !("searchPath" in this) ||
+          typeof this.searchPath !== "string" ||
+          Array.isArray(this.searchPath)
+        ) {
+          return null;
+        }
 
-      return this.searchPath;
-    },
-    parseVersion: (version) => {
-      if (
-        !("_parseVersion" in this) ||
-        typeof this._parseVersion !== "function"
-      ) {
-        throw new Error("this._parseVersion must exist.");
-      }
+        return this.searchPath;
+      },
+      parseVersion: (version) => {
+        if (
+          !("_parseVersion" in this) ||
+          typeof this._parseVersion !== "function"
+        ) {
+          throw new Error("this._parseVersion must exist.");
+        }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-      const parsedVersion = this._parseVersion(version);
-      if (typeof parsedVersion !== "string") {
-        throw new Error("The version must be string type.");
-      }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+        const parsedVersion = this._parseVersion(version);
+        if (typeof parsedVersion !== "string") {
+          throw new Error("The version must be string type.");
+        }
 
-      return parsedVersion;
-    },
-    log: (level, message) => {
-      if (level === "warn") {
-        this.logger.warn?.(message);
-      } else {
-        this.logger.debug?.(message);
-      }
-    },
-  });
+        return parsedVersion;
+      },
+      log: (level, message) => {
+        if (level === "warn") {
+          this.logger.warn?.(message);
+        } else {
+          this.logger.debug?.(message);
+        }
+      },
+    });
+  }
 
-  _driver(): null {
-    return PGliteDialectCore._driver();
+  getContext(): PGliteDialectContext {
+    return this.driver as PGliteDialectContext;
   }
 
   _acquireOnlyConnection(): Promise<PGliteInterface> {
-    return this.core._acquireOnlyConnection();
+    return this.getContext()._acquireOnlyConnection();
   }
 
   override destroyRawConnection(connection: PGliteInterface): Promise<void> {
-    return this.core.destroyRawConnection(connection);
+    return this.getContext().destroyRawConnection(connection);
   }
 
   checkVersion(connection: PGliteInterface): Promise<string> {
-    return this.core.checkVersion(connection);
+    return this.getContext().checkVersion(connection);
   }
 
   setSchemaSearchPath(
     connection: PGliteInterface,
     searchPath: string | string[]
   ) {
-    return this.core.setSchemaSearchPath(connection, searchPath);
+    return this.getContext().setSchemaSearchPath(connection, searchPath);
   }
 
   _stream(
@@ -77,24 +87,20 @@ export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) 
     stream: NodeJS.WritableStream,
     options: unknown
   ) {
-    return this.core._stream(connection, obj, stream, options);
+    return _stream(connection, obj, stream, options);
   }
 
   _query(connection: PGliteInterface, obj: QueryObject): Promise<QueryObject> {
-    return this.core._query(connection, obj);
+    return _query(connection, obj);
   }
 
   processResponse(obj: QueryObject, runner: unknown): unknown {
-    return this.core.processResponse(obj, runner);
+    return processResponse(obj, runner);
   }
 
   override poolDefaults(): PoolDefaults {
-    return PGliteDialectCore.poolDefaults();
-  }
-
-  getPGlite(): PGliteInterface | null {
-    return this.core.getPGlite();
+    return poolDefaults();
   }
 }
 
-PGliteDialectCore.patch(PGliteDialect, { force: true });
+patchPGliteDialect(PGliteDialect);

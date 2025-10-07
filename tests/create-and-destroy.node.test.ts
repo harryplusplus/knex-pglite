@@ -20,7 +20,7 @@ describe("create clone with borrowed", () => {
     const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
-    expect(client.getPGlite()).toBe(null);
+    expect(client.getContext().getPGlite()).toBe(null);
 
     await expect(knex.raw("select 1")).resolves.not.toThrow();
   });
