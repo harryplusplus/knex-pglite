@@ -10,7 +10,7 @@ import {
 import Client_PG from "knex/lib/dialects/postgres/index.js";
 
 export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) {
-  private core: PGliteDialectCore;
+  private readonly core: PGliteDialectCore;
 
   constructor(config: Knex.Config) {
     super(config);
