@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
