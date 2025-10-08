@@ -9,12 +9,8 @@
 - [언어](#%EC%96%B8%EC%96%B4)
 - [설치](#%EC%84%A4%EC%B9%98)
 - [사용법](#%EC%82%AC%EC%9A%A9%EB%B2%95)
-  - [기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C)
-  - [PGlite 인스턴스 주입 방법](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4-%EC%A3%BC%EC%9E%85-%EB%B0%A9%EB%B2%95)
-    - [PGlite 인스턴스를 주입해야 하는 이유](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4%EB%A5%BC-%EC%A3%BC%EC%9E%85%ED%95%B4%EC%95%BC-%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0)
-    - [여러 유닛 테스트 간 격리된 동일 데이터를 사용하는 방법](#%EC%97%AC%EB%9F%AC-%EC%9C%A0%EB%8B%9B-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EA%B0%84-%EA%B2%A9%EB%A6%AC%EB%90%9C-%EB%8F%99%EC%9D%BC-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95)
-    - [`connection` 속성에 `satisfies`와 `as`을 사용하는 이유](#connection-%EC%86%8D%EC%84%B1%EC%97%90-satisfies%EC%99%80-as%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0)
-    - [덤프 데이터를 불러오는 방법](#%EB%8D%A4%ED%94%84-%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%A5%BC-%EB%B6%88%EB%9F%AC%EC%98%A4%EB%8A%94-%EB%B0%A9%EB%B2%95)
+  - [쉬운 초기화](#%EC%89%AC%EC%9A%B4-%EC%B4%88%EA%B8%B0%ED%99%94)
+  - [PGlite 인스턴스 주입](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4-%EC%A3%BC%EC%9E%85)
 - [API](#api)
   - [`client`](#client)
   - [`connection`](#connection)
@@ -44,136 +40,92 @@ pnpm add knex @electric-sql/pglite @harryplusplus/knex-pglite
 
 ## 사용법
 
-### 기본 메모리 모드
+### 쉬운 초기화
 
-PGlite를 기본 메모리 모드로 사용하려면 아래 예제처럼 초기화하세요.
+Knex 생성 함수의 `client` 및 `connection` 속성을 구성합니다.
+`connection` 속성의 값은 PGlite 생성자의 `dataDir` 매개변수로 사용됩니다.
+
+> [!NOTE]
+> PGlite 생성자의 `dataDir`의 자세한 스펙은 [PGlite API `dataDir`](https://pglite.dev/docs/api#datadir) 문서를 확인해주세요.
+
+아래 예제는 쉬운 초기화를 하는 방법입니다.
 
 ```typescript
 import { PGliteDialect } from "@harryplusplus/knex-pglite";
 import Knex from "knex";
 
 const knex = Knex({
-  client: PGliteDialect, // Knex PGlite 방언을 사용하려면 반드시 설정해야 합니다.
-  connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
+  client: PGliteDialect, // Knex PGlite Dialect
+
+  // In-memory 임시 저장소
+  connection: {},
+  connection: "",
+  connection: "memory://",
+
+  // IndexedDB 저장소
+  connection: "idb://",
+
+  // 파일 시스템 저장소
+  connection: "/my/pglite/data",
 });
 ```
 
-위 예제처럼 초기화된 PGlite 인스턴스는 Knex 인스턴스 내에서 생성되므로 Knex 인스턴스의 생명주기를 공유합니다.
-대부분의 사용 사례에서는 이 방법으로 충분할 수 있습니다.
+> [!WARNING]  
+> `connection` 속성이 없으면 Knex는 **비연결 모드**로 동작합니다.
+> 비연결 모드는 SQL 문자열 생성기로 동작하는 것이기 때문에, PGlite를 사용하기 위해서는 반드시 빈 객체라도 값을 정의해야 합니다.
 
-> [!NOTE]
-> `connection` 속성이 빈 객체로 초기화되면, 내부적으로 PGlite의 기본 생성자(`new PGlite()`)를 호출합니다.
+> [!WARNING]  
+> File URI (e.g. `file:///my/pglite/data`) 형태의 `connection` 값은 현재 Knex의 연결 문자열 파싱 규칙상 PGlite를 초기화하기 위한 형태로 분석되지 않기 때문에 사용할 수 없습니다.
+> File URI가 아닌 파일 경로 (e.g. `/my/pglite/data`) 형태로 입력해주세요.
 
-하지만 특정 사용 사례에서는 이 방법이 충분하지 않을 수 있습니다.
-다음 절인 [PGlite 인스턴스 주입 방법](#pglite-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4-%EC%A3%BC%EC%9E%85-%EB%B0%A9%EB%B2%95)을 참고하세요.
+### PGlite 인스턴스 주입
 
-### PGlite 인스턴스 주입 방법
+[쉬운 초기화](#%EC%89%AC%EC%9A%B4-%EC%B4%88%EA%B8%B0%ED%99%94) 방법을 사용할 경우, PGlite 인스턴스는 Knex 인스턴스가 소유한(**owned**) 상태가 됩니다.
+다시 말해 PGlite 인스턴스는 Knex 인스턴스와 생명주기를 공유합니다.
 
-#### PGlite 인스턴스를 주입해야 하는 이유
+In-memory 임시 저장소 방식의 PGlite 인스턴스의 경우, 사용 사례에 따라 Knex 인스턴스와 생명주기를 공유하는 것이 요구사항에 부합하지 않을 수 있습니다.
+또한 PGlite 초기화를 위한 다양한 매개변수를 활용할 수 없습니다.
 
-PGlite는 단일 인스턴스 기반 데이터베이스입니다.
-일반적인 네트워크나 파일 시스템 기반 클라이언트/서버 구조 데이터베이스와 다릅니다.
-[기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C)에서 설명한 것처럼 Knex 인스턴스 내부에서 PGlite 인스턴스를 생성하면, 마치 클라이언트 내부에 서버를 생성하는 것과 같습니다.
-실제로 Knex 인스턴스가 해제되면 PGlite 인스턴스도 함께 해제됩니다.
-메모리 데이터의 덤프 및 로드, 여러 유닛 테스트 간 동일한 데이터의 격리 사용 등과 같은 경우 PGlite 인스턴스를 Knex 인스턴스에 주입하는 것이 유용할 수 있습니다.
+`connection.pglite` 속성을 PGlite 인스턴스를 반환하는 동기 또는 비동기 함수로 구성합니다.
+이 경우 Knex 내부에서는 PGlite 인스턴스를 빌린(**borrowed**) 상태로 간주합니다. 다시 말해 PGlite 인스턴스의 생명주기를 외부로 위임했기 때문에, PGlite 인스턴스의 생성과 소멸을 관리하지 않습니다.
 
-#### 여러 유닛 테스트 간 격리된 동일 데이터를 사용하는 방법
-
-아래 예제는 여러 유닛 테스트 간에 격리된 동일 데이터를 사용하는 방법입니다.
-PGlite 인스턴스를 테스트 환경 데이터로 초기화한 뒤, `pglite.clone()` 메서드로 격리된 환경을 복제합니다.
-매번 새로 초기화하는 것보다 효율적일 수 있습니다.
+아래 예제는 PGlite 인스턴스를 주입하는 방법입니다.
 
 ```typescript
 import { PGlite } from "@electric-sql/pglite";
+import Knex from "knex";
 import {
-  PGliteDialect,
   PGliteConnectionConfig,
-} from "@harryplusplus/knex-pglite";
-import Knex from "knex";
-
-async function doTestSuite() {
-  const pglite = new PGlite();
-  // 데이터 구성하기...
-  await Promise.all([doUnitTest1(pglite), doUnitTest2(pglite)]);
-}
-
-async function doUnitTest1(pglite: PGlite) {
-  const knex = Knex({
-    client: PGliteDialect,
-    connection: {
-      pglite: () => pglite.clone(), // 데이터 복사
-    } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
-  });
-  // 테스트 코드 실행...
-}
-
-async function doUnitTest2(pglite: PGlite) {
-  const knex = Knex({
-    client: PGliteDialect,
-    connection: {
-      pglite: () => pglite.clone(), // 데이터 복사
-    } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
-  });
-  // 테스트 코드 실행...
-}
-```
-
-#### `connection` 속성에 `satisfies`와 `as`을 사용하는 이유
-
-`connection` 속성에 `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig`를 사용하는 이유는 다음과 같습니다.
-
-1. `connection` 객체의 타입을 엄격히 검사하기 위해 `satisfies PGliteConnectionConfig`를 사용합니다.
-2. Knex의 `connection` 타입 정의와 일치시키기 위해 `as Knex.Knex.StaticConnectionConfig`를 사용합니다.
-
-#### 덤프 데이터를 불러오는 방법
-
-아래 예제는 덤프 데이터를 불러오는 방법입니다.
-
-```typescript
-import { PGlite } from "@electric-sql/pglite";
-import {
   PGliteDialect,
-  PGliteConnectionConfig,
 } from "@harryplusplus/knex-pglite";
-import Knex from "knex";
 
-async function doTest(data: File) {
-  const knex = Knex({
-    client: PGliteDialect,
-    connection: {
-      pglite: () =>
-        new PGlite({
-          loadDataDir: data, // 덤프 데이터 불러오기
-        }),
-    } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
-  });
-  // 테스트 코드 실행...
-}
-```
-
-## API
-
-Knex를 초기화할 때 `config` 매개변수에서 다음 속성을 설정합니다.
-
-### `client`
-
-`client` 속성에 `PGliteDialect` 클래스를 지정해야 Knex PGlite 방언을 사용할 수 있습니다.
-
-예제는 다음과 같습니다.
-
-```typescript
-import { PGliteDialect } from "@harryplusplus/knex-pglite";
-import Knex from "knex";
+const pglite = new PGlite();
 
 const knex = Knex({
   client: PGliteDialect,
-  // ...
+  connection: {
+    pglite: () => pglite,
+  } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
 });
 ```
 
+> [!NOTE]
+> `satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig`를 사용하는 이유는 다음과 같습니다.
+>
+> 1. `satisfies PGliteConnectionConfig`를 사용해 Knex PGlite Dialect에 필요한 `connection` 속성의 타입을 강제합니다.
+> 2. `as Knex.Knex.StaticConnectionConfig`를 사용해 Knex 타입 정의에 부합하도록 단언합니다.
+
+## API
+
+Knex 생성 함수의 매개변수 중에서 다음 속성을 구성합니다.
+
+### `client`
+
+`client` 속성에 `PGliteDialect` 클래스를 지정해야 Knex PGlite Dialect를 사용할 수 있습니다.
+
 ### `connection`
 
-`connection` 속성 타입은 다음과 같습니다.
+`connection` 속성의 타입은 다음과 같습니다.
 
 ```typescript
 export interface PGliteConnectionConfig {
@@ -185,37 +137,12 @@ export interface PGliteConnectionConfig {
 
 #### `pglite`
 
-`pglite` 속성 타입은 다음과 같습니다.
-동기 혹은 비동기 함수 형태로 등록할 수 있습니다.
-값이 지정되지 않으면 [기본 메모리 모드](#%EA%B8%B0%EB%B3%B8-%EB%A9%94%EB%AA%A8%EB%A6%AC-%EB%AA%A8%EB%93%9C) 절에서 설명한 대로 기본 메모리 모드로 동작합니다.
+`pglite` 속성의 타입은 다음과 같습니다.
 
 ```typescript
 export interface PGliteProvider {
   (): MaybePromise<PGlite>; // (): PGlite | Promise<PGlite>
 }
-```
-
-예제는 다음과 같습니다.
-
-```typescript
-import { PGlite } from "@electric-sql/pglite";
-import {
-  PGliteDialect,
-  PGliteConnectionConfig,
-} from "@harryplusplus/knex-pglite";
-import Knex from "knex";
-
-const pglite = new PGlite();
-const knex = Knex({
-  client: PGliteDialect,
-  // 기본 메모리 모드로 구성할 경우
-  // connection: {}, // SQL 생성용이 아닌, PGlite 연결을 위해 최소 빈 객체로 초기화해야 합니다.
-
-  // PGlite 인스턴스를 주입할 경우
-  connection: {
-    pglite: () => pglite, // PGlite 인스턴스를 주입합니다.
-  } satisfies PGliteConnectionConfig as Knex.Knex.StaticConnectionConfig,
-});
 ```
 
 > [!NOTE]
