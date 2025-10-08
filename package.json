@@ -30,8 +30,7 @@
     }
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
     "all": "run-s generate:readme-toc format lint test build",
