@@ -1,6 +1,6 @@
 # Knex.js PGlite Dialect
 
-[Knex.js](https://knexjs.org/)를 위한 [PGlite](https://pglite.dev/) 방언.
+[PGlite](https://pglite.dev/)를 [Knex.js](https://knexjs.org/)과 함께 사용하기 위한 방언입니다.
 
 ## 목차
 
