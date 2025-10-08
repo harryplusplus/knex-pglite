@@ -3,82 +3,65 @@ import type { Knex } from "knex";
 import {
   _query,
   _stream,
+  checkVersion,
   patchPGliteDialect,
-  PGliteDialectContext,
   poolDefaults,
   PoolDefaults,
   processResponse,
   QueryObject,
-} from "./pglite-dialect-context.js";
+  setSchemaSearchPath,
+} from "./pglite-dialect-functions.js";
 
 // @ts-expect-error Based on knex@3.1.0
 import Client_PG from "knex/lib/dialects/postgres/index.js";
+import { PGliteDialectDataSource } from "./pglite-dialect-data-source.js";
 
 export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) {
+  declare searchPath?: unknown;
+  declare _parseVersion?: (version: unknown) => unknown;
+
   /**
-   * The driver has its own state for each pglite dialect.
+   * The driver has its own data source for each pglite dialect.
    */
-  _driver(): PGliteDialectContext {
-    return new PGliteDialectContext({
-      getConnectionSettings: () => this.connectionSettings,
-      getSearchPath: () => {
-        if (
-          !("searchPath" in this) ||
-          typeof this.searchPath !== "string" ||
-          Array.isArray(this.searchPath)
-        ) {
-          return null;
-        }
-
-        return this.searchPath;
-      },
-      parseVersion: (version) => {
-        if (
-          !("_parseVersion" in this) ||
-          typeof this._parseVersion !== "function"
-        ) {
-          throw new Error("this._parseVersion must exist.");
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
-        const parsedVersion = this._parseVersion(version);
-        if (typeof parsedVersion !== "string") {
-          throw new Error("The version must be string type.");
-        }
-
-        return parsedVersion;
-      },
-      log: (level, message) => {
-        if (level === "warn") {
-          this.logger.warn?.(message);
-        } else {
-          this.logger.debug?.(message);
-        }
-      },
-    });
+  _driver(): PGliteDialectDataSource {
+    return new PGliteDialectDataSource();
   }
 
-  getContext(): PGliteDialectContext {
-    return this.driver as PGliteDialectContext;
+  getDataSource(): PGliteDialectDataSource {
+    return this.driver as PGliteDialectDataSource;
   }
 
   _acquireOnlyConnection(): Promise<PGliteInterface> {
-    return this.getContext()._acquireOnlyConnection();
+    return this.getDataSource()._acquireOnlyConnection({
+      getConnectionSettings: () => this.connectionSettings,
+    });
   }
 
   override destroyRawConnection(connection: PGliteInterface): Promise<void> {
-    return this.getContext().destroyRawConnection(connection);
+    return this.getDataSource().destroyRawConnection(connection);
   }
 
   checkVersion(connection: PGliteInterface): Promise<string> {
-    return this.getContext().checkVersion(connection);
+    return checkVersion(
+      {
+        parseVersion: (version) => this._parseVersion?.(version),
+      },
+      connection
+    );
   }
 
   setSchemaSearchPath(
     connection: PGliteInterface,
     searchPath: string | string[]
   ) {
-    return this.getContext().setSchemaSearchPath(connection, searchPath);
+    return setSchemaSearchPath(
+      {
+        getSearchPath: () => this.searchPath,
+        warn: (message) => this.logger.warn?.(message),
+      },
+      connection,
+      searchPath
+    );
   }
 
   _stream(

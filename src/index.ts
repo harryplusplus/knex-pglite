@@ -1,2 +1,3 @@
-export * from "./pglite-dialect-context.js";
+export * from "./pglite-dialect-data-source.js";
+export * from "./pglite-dialect-functions.js";
 export * from "./pglite-dialect.js";

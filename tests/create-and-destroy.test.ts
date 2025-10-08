@@ -17,7 +17,7 @@ describe("create with owned", () => {
     const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
-    expect(client.getContext().getPGlite()).toBe(null);
+    expect(client.getDataSource().getPGlite()).toBe(null);
 
     await expect(knex.raw("select 1")).resolves.not.toThrow();
   });
@@ -44,7 +44,7 @@ describe("create with borrowed", () => {
     const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
-    expect(client.getContext().getPGlite()).toBe(null);
+    expect(client.getDataSource().getPGlite()).toBe(null);
 
     await expect(knex.raw("select 1")).resolves.not.toThrow();
   });
@@ -73,7 +73,7 @@ describe("create with sync", () => {
     const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
-    expect(client.getContext().getPGlite()).toBe(null);
+    expect(client.getDataSource().getPGlite()).toBe(null);
 
     await expect(knex.raw("select 1")).resolves.not.toThrow();
   });
@@ -101,7 +101,7 @@ describe("create with async", () => {
     const client = knex.client as PGliteDialect;
     expect(client.dialect).toBe("pglite");
     expect(client.driverName).toBe("@electric-sql/pglite");
-    expect(client.getContext().getPGlite()).toBe(null);
+    expect(client.getDataSource().getPGlite()).toBe(null);
 
     await expect(knex.raw("select 1")).resolves.not.toThrow();
   });

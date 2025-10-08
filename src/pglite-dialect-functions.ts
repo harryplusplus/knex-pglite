@@ -29,134 +29,94 @@ export interface QueryObject {
   response: Results | Results[];
 }
 
-export interface PGliteDialectDelegate {
-  getConnectionSettings(): PGliteConnectionSettings;
-  parseVersion(version: string): string;
-  getSearchPath(): string | string[] | null;
-  log(level: "warn", message: string): void;
-}
-
-export class PGliteDialectContext {
-  private acquirePromise: Promise<PGliteInterface> | null = null;
-  private pglite: PGliteInterface | null = null;
-  private ownership: "owned" | "borrowed" | null = null;
-
-  constructor(private readonly delegate: PGliteDialectDelegate) {}
-
-  /**
-   * To override Knex.Client_PG._acquireOnlyConnection
-   */
-  _acquireOnlyConnection(): Promise<PGliteInterface> {
-    if (this.acquirePromise) {
-      return this.acquirePromise;
-    }
-
-    this.acquirePromise = this.acquire();
-    return this.acquirePromise;
-  }
-
-  /**
-   * To override Knex.Client_PG.destroyRawConnection
-   */
-  async destroyRawConnection(connection: PGliteInterface): Promise<void> {
-    if (this.ownership === "owned") {
-      await connection.close();
-    }
-
-    this.pglite = null;
-    this.ownership = null;
-    this.acquirePromise = null;
-  }
-
-  /**
-   * To override Knex.Client_PG.checkVersion
-   */
-  async checkVersion(connection: PGliteInterface): Promise<string> {
-    const { rows } = await connection.query("select version()");
-    if (rows.length < 1) {
-      throw new Error("Invalid select version result length.");
-    }
-
-    const row = rows[0];
-    if (
-      !row ||
-      typeof row !== "object" ||
-      !("version" in row) ||
-      typeof row.version !== "string"
-    ) {
-      throw new Error("Invalid select version row shape.");
-    }
-
-    const { version } = row;
-    return this.delegate.parseVersion(version);
-  }
-
-  /**
-   * To override Knex.Client_PG.setSchemaSearchPath
-   */
-  async setSchemaSearchPath(
-    connection: PGliteInterface,
-    searchPath: string | string[]
-  ): Promise<boolean> {
-    const pathOrList = searchPath || this.delegate.getSearchPath();
-    if (!pathOrList) {
-      return true;
-    }
-
-    const paths: string[] = [];
-    if (typeof pathOrList === "string") {
-      const path = pathOrList;
-      if (path.includes(",")) {
-        const parts = path.split(",");
-        const arraySyntax = `[${parts
-          .map((searchPath) => `'${searchPath}'`)
-          .join(", ")}]`;
-        this.delegate.log(
-          "warn",
-          `Detected comma in searchPath "${path}".` +
-            `If you are trying to specify multiple schemas, use Array syntax: ${arraySyntax}`
-        );
-      }
-
-      paths.push(path);
-    } else {
-      paths.push(...pathOrList);
-    }
-
-    const path = paths.map((schemaName) => `"${schemaName}"`).join(",");
-    await connection.query(`set search_path to ${path}`);
+/**
+ * To override Knex.Client_PG.setSchemaSearchPath
+ */
+export async function setSchemaSearchPath(
+  client: {
+    getSearchPath(): unknown;
+    warn(message: unknown): void;
+  },
+  connection: PGliteInterface,
+  searchPath: unknown
+): Promise<boolean> {
+  const pathOrList = searchPath || client.getSearchPath();
+  if (!pathOrList) {
     return true;
   }
 
-  getPGlite(): PGliteInterface | null {
-    return this.pglite;
+  if (!Array.isArray(pathOrList) && typeof pathOrList !== "string") {
+    throw new TypeError(
+      `knex: Expected searchPath to be Array/String, got: ${typeof pathOrList}`
+    );
   }
 
-  private async acquire(): Promise<PGliteInterface> {
-    if (this.pglite) {
-      await this.pglite.waitReady;
-      return this.pglite;
+  const paths: string[] = [];
+  if (typeof pathOrList === "string") {
+    const path = pathOrList;
+    if (path.includes(",")) {
+      const parts = path.split(",");
+      const arraySyntax = `[${parts
+        .map((searchPath) => `'${searchPath}'`)
+        .join(", ")}]`;
+      client.warn(
+        `Detected comma in searchPath "${path}".` +
+          `If you are trying to specify multiple schemas, use Array syntax: ${arraySyntax}`
+      );
     }
 
-    const { filename, database, pglite } =
-      this.delegate.getConnectionSettings();
-    if (pglite) {
-      this.pglite = await pglite();
-      this.ownership = "borrowed";
-    } else {
-      const { PGlite } = await import("@electric-sql/pglite");
-      const dataDir = filename ?? database ?? "";
-      this.pglite = new PGlite(dataDir);
-      this.ownership = "owned";
-    }
+    paths.push(path);
+  } else {
+    paths.push(
+      ...pathOrList.map((x) => {
+        if (typeof x !== "string") {
+          throw new Error(
+            `The pathOrList must be string type. type: ${typeof x}`
+          );
+        }
 
-    if (!this.pglite) {
-      throw new Error("this.pglite must exist.");
-    }
-
-    await this.pglite.waitReady;
-    return this.pglite;
+        return x;
+      })
+    );
   }
+
+  const path = paths.map((schemaName) => `"${schemaName}"`).join(",");
+  await connection.query(`set search_path to ${path}`);
+  return true;
+}
+
+/**
+ * To override Knex.Client_PG.checkVersion
+ */
+export async function checkVersion(
+  client: {
+    parseVersion: (version: unknown) => unknown;
+  },
+  connection: PGliteInterface
+): Promise<string> {
+  const { rows } = await connection.query("select version()");
+  if (rows.length < 1) {
+    throw new Error("Invalid select version result length.");
+  }
+
+  const row = rows[0];
+  if (
+    !row ||
+    typeof row !== "object" ||
+    !("version" in row) ||
+    typeof row.version !== "string"
+  ) {
+    throw new Error("Invalid select version row shape.");
+  }
+
+  const { version } = row;
+  const versionString = client.parseVersion(version);
+
+  if (typeof versionString !== "string") {
+    throw new Error("The versionString must be string type.");
+  }
+
+  return versionString;
 }
 
 /**
