@@ -7,7 +7,7 @@ export default defineConfig({
         test: {
           name: "node",
           include: ["**/*.test.ts"],
-          exclude: ["**/*.browser.test.ts"],
+          exclude: ["node_modules/", "**/*.browser.test.ts"],
           testTimeout: 10 * 1000,
           environment: "node",
         },
@@ -16,7 +16,7 @@ export default defineConfig({
         test: {
           name: "browser",
           include: ["**/*.test.ts"],
-          exclude: ["**/*.node.test.ts"],
+          exclude: ["node_modules/", "**/*.node.test.ts"],
           testTimeout: 10 * 1000,
           environment: "jsdom",
         },
