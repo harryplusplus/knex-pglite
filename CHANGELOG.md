@@ -1,5 +1,11 @@
 # @harryplusplus/knex-pglite
 
+## 0.13.9
+
+### Patch Changes
+
+- f19264a: Apply changeset
+
 ## 0.13.8
 
 ### Patch Changes
