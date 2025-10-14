@@ -33,6 +33,9 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Build and test
+        run: pnpm ci:release
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
