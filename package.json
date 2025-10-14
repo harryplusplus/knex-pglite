@@ -46,7 +46,6 @@
     "test": "vitest --run"
   },
   "devDependencies": {
-    "@changesets/cli": "2.29.7",
     "@electric-sql/pglite": "^0.3.10",
     "@eslint/js": "9.36.0",
     "@types/node": "24.6.2",
@@ -58,6 +57,7 @@
     "npm-run-all": "4.1.5",
     "prettier": "3.6.2",
     "rimraf": "6.0.1",
+    "semantic-release": "24.2.9",
     "sort-package-json": "3.4.0",
     "tsup": "8.5.0",
     "tsx": "4.20.6",
