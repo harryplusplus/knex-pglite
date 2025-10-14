@@ -33,10 +33,14 @@
     "dist"
   ],
   "scripts": {
-    "all": "run-s generate:readme-toc format lint test build",
-    "build": "run-s clean build:js build:types",
+    "all": "run-s generate:readme-toc format lint test build check:import",
+    "build": "run-s clean build:js build:dts",
+    "build:dts": "tsc -p tsconfig.build.json",
     "build:js": "tsup",
-    "build:types": "tsc -p tsconfig.build.json",
+    "check:import": "run-p check:import:*",
+    "check:import:cjs": "node dist/index.cjs",
+    "check:import:esm": "node dist/index.js",
+    "ci:test": "run-s lint test build check:import",
     "clean": "rimraf dist",
     "format": "run-p format:*",
     "format:package-json": "sort-package-json package.json",
