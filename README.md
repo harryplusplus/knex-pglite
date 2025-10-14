@@ -1,5 +1,8 @@
 # Knex.js PGlite Dialect
 
+[![npm version](https://img.shields.io/npm/v/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
+[![npm downloads](https://img.shields.io/npm/dm/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
+
 A dialect for using [PGlite](https://pglite.dev/) with [Knex.js](https://knexjs.org/).
 
 ## Table of Contents

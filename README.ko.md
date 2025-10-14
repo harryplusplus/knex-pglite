@@ -1,5 +1,8 @@
 # Knex.js PGlite Dialect
 
+[![npm version](https://img.shields.io/npm/v/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
+[![npm downloads](https://img.shields.io/npm/dm/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
+
 [PGlite](https://pglite.dev/)를 [Knex.js](https://knexjs.org/)과 함께 사용하기 위한 방언입니다.
 
 ## 목차
