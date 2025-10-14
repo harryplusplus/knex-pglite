@@ -33,7 +33,7 @@
     "dist"
   ],
   "scripts": {
-    "all": "run-s generate:readme-toc format lint test build check:import",
+    "all": "run-s generate:readme-toc format ci:test",
     "build": "run-s clean build:js build:dts",
     "build:dts": "tsc -p tsconfig.build.json",
     "build:js": "tsup",

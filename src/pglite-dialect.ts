@@ -1,5 +1,6 @@
 import { PGliteInterface } from "@electric-sql/pglite";
 import type { Knex } from "knex";
+import { PGliteDialectDataSource } from "./pglite-dialect-data-source.js";
 import {
   _query,
   _stream,
@@ -14,7 +15,6 @@ import {
 
 // @ts-expect-error Based on knex@3.1.0
 import Client_PG from "knex/lib/dialects/postgres/index.js";
-import { PGliteDialectDataSource } from "./pglite-dialect-data-source.js";
 
 export class PGliteDialect extends (Client_PG as unknown as typeof Knex.Client) {
   declare searchPath?: unknown;
