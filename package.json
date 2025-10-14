@@ -40,7 +40,7 @@
     "check:import": "run-p check:import:*",
     "check:import:cjs": "node dist/index.cjs",
     "check:import:esm": "node dist/index.js",
-    "ci:release": "run-s build",
+    "ci:release": "run-s ci:test",
     "ci:test": "run-s lint test build check:import",
     "clean": "rimraf dist",
     "format": "run-p format:*",
@@ -80,6 +80,6 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "provenance": true
   }
 }
