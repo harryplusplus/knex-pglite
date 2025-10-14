@@ -79,6 +79,7 @@
     "node": ">= 20.19.5"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   }
 }
