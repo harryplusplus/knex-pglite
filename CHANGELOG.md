@@ -1,5 +1,11 @@
 # @harryplusplus/knex-pglite
 
+## 0.13.10
+
+### Patch Changes
+
+- 53e9e0d: Apply changeset
+
 ## 0.13.9
 
 ### Patch Changes
