@@ -1,6 +1,6 @@
 {
   "name": "@harryplusplus/knex-pglite",
-  "version": "0.13.10",
+  "version": "0.13.12",
   "description": "A dialect for using PGlite with Knex.js.",
   "keywords": [
     "knex",
