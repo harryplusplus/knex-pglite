@@ -1,5 +1,6 @@
 # Knex.js PGlite Dialect
 
+[![test](https://github.com/harryplusplus/knex-pglite/actions/workflows/test.yml/badge.svg)](https://github.com/harryplusplus/knex-pglite/actions/workflows/test.yml)
 [![npm version](https://img.shields.io/npm/v/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
 [![npm downloads](https://img.shields.io/npm/dm/@harryplusplus/knex-pglite)](https://www.npmjs.com/package/@harryplusplus/knex-pglite)
 
